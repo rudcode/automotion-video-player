@@ -59,10 +59,10 @@ OMXPLAYER_ARGS = [
 omxplayer = None
 
 class GPIOControl():
-	self.laser_gpio = 14
-	self.relay_gpio = 15
-
 	def __init__(self):
+                self.laser_gpio = 14
+                self.relay_gpio = 15
+                
 		GPIO.setmode(GPIO.BCM)
 		GPIO.setwarnings(False)
 		GPIO.setup(self.laser_gpio, GPIO.IN)
@@ -84,7 +84,7 @@ class GPIOControl():
 			if state == 1:
 				print 'Motion detected!'
 				GPIO.output(self.relay_gpio, GPIO.HIGH)
-				time.sleep(2)
+				time.sleep(0)
 				omxplayer.play()
 			else:
 				print 'NO motion detected!'
@@ -111,14 +111,15 @@ class Main():
 			print 'Video player is armed!'
 			print 'Video duration = ' + str(omxplayer.duration())
 			
-			while(gpio_control.motion_detected()):
-				continue;
+			#while(gpio_control.motion_detected()):
+			#	continue;
 			
 			gpio_control.start()
 			
 			#loop_num = int(omxplayer.duration() / duration_sect)
 			
 			i = duration_sect
+			last_sect = False
 
 			while True:
 				status = 0
@@ -126,19 +127,19 @@ class Main():
 				while status != 1:
 					pos = omxplayer.position()
 					#print str(pos)
-					if pos >= i:
-					  status = 1
+					if pos + 0.01 >= i:
+                                                if last_sect: 
+                                                        i = 0
+                                                        omxplayer.set_position(0)
+                                                status = 1
 					continue
 				if gpio_control.motion_detected() == 0:
 					gpio_control.turn_off_relay()
 					omxplayer.pause()
 
 				i += duration_sect
-				if i >= omxplayer.duration() - duration_sect:
-					i = duration_sect
-					omxplayer.set_position(0)
-				  
-				#print "i="+str(i)
+				if i + duration_sect >= omxplayer.duration():
+                                        last_sect = True
 
 		except IOError as e:
 			return_code = -1
