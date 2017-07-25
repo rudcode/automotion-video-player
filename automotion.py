@@ -129,8 +129,9 @@ class Main():
 					#print str(pos)
 					if pos + 0.01 >= i:
                                                 if last_sect: 
-                                                        i = 0
                                                         omxplayer.set_position(0)
+                                                        last_sect = False
+                                                        i = 0
                                                 status = 1
 					continue
 				if gpio_control.motion_detected() == 0:
